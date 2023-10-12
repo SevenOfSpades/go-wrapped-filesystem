@@ -10,19 +10,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-type fakeStreamer struct {
+type fakeReadCloser struct {
 	buff *bytes.Buffer
 }
 
-func newFakeStreamer[T string | []byte](data T) *fakeStreamer {
-	return &fakeStreamer{buff: bytes.NewBuffer([]byte(data))}
+func newFakeReadCloser[T string | []byte](data T) *fakeReadCloser {
+	return &fakeReadCloser{buff: bytes.NewBuffer([]byte(data))}
 }
 
-func (s *fakeStreamer) Read(p []byte) (n int, err error) {
+func (s *fakeReadCloser) Read(p []byte) (n int, err error) {
 	return s.buff.Read(p)
 }
 
-func (s *fakeStreamer) Close() error {
+func (s *fakeReadCloser) Close() error {
 	s.buff.Reset()
 	return nil
 }
@@ -70,9 +70,9 @@ func TestStreamContentOf(t *testing.T) {
 
 		// GIVEN
 		expectedPath := "path/to/file"
-		fs, err := New(OptionStreamContentOfHandler(func(path string) (Streamer, error) {
+		fs, err := New(OptionStreamContentOfHandler(func(path string) (io.ReadCloser, error) {
 			assert.Equal(t, expectedPath, path)
-			return newFakeStreamer([]byte("TEST")), nil
+			return newFakeReadCloser([]byte("TEST")), nil
 		}))
 
 		// WHEN
@@ -89,7 +89,7 @@ func TestStreamContentOf(t *testing.T) {
 
 		// GIVEN
 		expectedPath := "path/to/file"
-		fs, err := New(OptionStreamContentOfHandler(func(path string) (Streamer, error) {
+		fs, err := New(OptionStreamContentOfHandler(func(path string) (io.ReadCloser, error) {
 			assert.Equal(t, expectedPath, path)
 			return nil, errors.New("something went wrong")
 		}))
@@ -100,5 +100,25 @@ func TestStreamContentOf(t *testing.T) {
 		// THEN
 		require.EqualError(t, err, "failed to attach reader to path/to/file: something went wrong")
 		assert.Nil(t, result)
+	})
+}
+
+func TestCheckIfExists(t *testing.T) {
+	t.Run("it should pass execution to provided handler", func(t *testing.T) {
+		t.Parallel()
+
+		// GIVEN
+		expectedPath := "path/to/file"
+		fs, err := New(OptionCheckIfExistsHandler(func(path string) (bool, error) {
+			assert.Equal(t, expectedPath, path)
+			return true, nil
+		}))
+
+		// WHEN
+		result, err := CheckIfExists(fs, expectedPath)
+
+		// THEN
+		require.NoError(t, err)
+		assert.True(t, result)
 	})
 }
