@@ -73,7 +73,7 @@ func main() {
 |:-----------------:|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:------------------:|:----------------------:|:---------------:|:------------------:|
 |  `ReadContentOf`  | Returns entire content of the file as `filesystem.Content` (`[]byte` with extra functions).                                                                                                                                                     | :white_check_mark: |          :x:           |     v0.0.1      | :white_check_mark: |
 | `StreamContentOf` | Returns `io.ReadCloser` attached to the file.<br/>It cannot be guaranteed that all implementations perform actual streaming of the content and won't preload whole file into buffer so please refer to handler's documentation before using it. | :white_check_mark: |          :x:           |     v0.0.1      | :white_check_mark: |
-|  `CheckIfExists`  | Returns information (`boolean`) verifying existence of provided path (works for files and directories).                                                                                                                                         | :white_check_mark: |          :x:           |     v0.0.2      | :white_check_mark: |
+|  `CheckIfExists`  | Returns information (`boolean`) verifying existence of provided path (works for files and directories).                                                                                                                                         | :white_check_mark: |   :white_check_mark:   |     v0.0.2      | :white_check_mark: |
 
 ## TODO
 
