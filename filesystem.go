@@ -25,8 +25,32 @@ func New(opts ...options.Option) (Filesystem, error) {
 	if err != nil {
 		return nil, fmt.Errorf("filesystem initialization failed: %w", err)
 	}
+	optCreateFileHandler, err := options.ReadOrDefault[CreateFileHandlerFunc](opt, optionCreateFileHandler, createFileDefaultHandler)
+	if err != nil {
+		return nil, fmt.Errorf("filesystem initialization failed: %w", err)
+	}
+	optWriteContentToHandler, err := options.ReadOrDefault[WriteContentToHandlerFunc](opt, optionWriteContentToHandler, writeContentToDefaultHandler)
+	if err != nil {
+		return nil, fmt.Errorf("filesystem initialization failed: %w", err)
+	}
+	optStreamContentToHandler, err := options.ReadOrDefault[StreamContentToHandlerFunc](opt, optionStreamContentToHandler, streamContentToDefaultHandler)
+	if err != nil {
+		return nil, fmt.Errorf("filesystem initialization failed: %w", err)
+	}
+	optCreateDirectoryHandler, err := options.ReadOrDefault[CreateDirectoryHandlerFunc](opt, optionCreateDirectoryHandler, createDirectoryDefaultHandler)
+	if err != nil {
+		return nil, fmt.Errorf("filesystem initialization failed: %w", err)
+	}
 
-	return newFilesystem(optReadContentOfHandler, optStreamContentOfHandler, optCheckIfExistsHandler)
+	return newFilesystem(
+		optReadContentOfHandler,
+		optStreamContentOfHandler,
+		optCheckIfExistsHandler,
+		optCreateFileHandler,
+		optWriteContentToHandler,
+		optStreamContentToHandler,
+		optCreateDirectoryHandler,
+	)
 }
 
 // ReadContentOf will return entire content of file from provided path.
@@ -59,4 +83,36 @@ func CheckIfExists(fs Filesystem, path string) (bool, error) {
 		return false, fmt.Errorf("failed to verify existence of %s: %w", path, err)
 	}
 	return res, nil
+}
+
+// CreateFile creates empty file at provided location (along with missing parts of directory tree if allowed).
+func CreateFile(fs Filesystem, path string, args ...Argument) error {
+	if err := fs.handleCreateFile(path, args...); err != nil {
+		return fmt.Errorf("failed to create file %s: %w", path, err)
+	}
+	return nil
+}
+
+// WriteContentTo appends/overwrites content of file with provided data.
+func WriteContentTo[T ~string | ~[]byte](fs Filesystem, path string, content T, args ...Argument) error {
+	if err := fs.handleWriteContentTo(path, []byte(content), args...); err != nil {
+		return fmt.Errorf("failed to write content to %s: %w", path, err)
+	}
+	return nil
+}
+
+// StreamContentTo appends/overwrites content of file with content of provided io.Reader.
+func StreamContentTo(fs Filesystem, path string, content io.Reader, args ...Argument) error {
+	if err := fs.handleStreamContentTo(path, content, args...); err != nil {
+		return fmt.Errorf("failed to stream content to %s: %w", path, err)
+	}
+	return nil
+}
+
+// CreateDirectory makes empty directory at provided location (along with missing parts of directory tree if allowed).
+func CreateDirectory(fs Filesystem, path string, args ...Argument) error {
+	if err := fs.handleCreateDirectory(path, args...); err != nil {
+		return fmt.Errorf("failed to create directory at %s: %w", path, err)
+	}
+	return nil
 }

@@ -6,6 +6,10 @@ const (
 	optionReadContentOfHandler   options.OptionKey = `read_content_of_handler_func`
 	optionStreamContentOfHandler options.OptionKey = `stream_content_of_handler`
 	optionCheckIfExistsHandler   options.OptionKey = `check_if_exists_handler`
+	optionCreateFileHandler      options.OptionKey = `create_file_handler`
+	optionWriteContentToHandler  options.OptionKey = `write_content_to_handler`
+	optionStreamContentToHandler options.OptionKey = `stream_content_to_handler`
+	optionCreateDirectoryHandler options.OptionKey = `create_directory_handler`
 )
 
 // OptionReadContentOfHandler overrides default handler for ReadContentOf.
@@ -26,5 +30,29 @@ func OptionStreamContentOfHandler(handlerFunc StreamContentOfHandlerFunc) option
 func OptionCheckIfExistsHandler(handlerFunc CheckIfExistsHandlerFunc) options.Option {
 	return func(o options.Options) {
 		options.WriteOrPanic[CheckIfExistsHandlerFunc](o, optionCheckIfExistsHandler, handlerFunc)
+	}
+}
+
+func OptionCreateFileHandler(handlerFunc CreateFileHandlerFunc) options.Option {
+	return func(o options.Options) {
+		options.WriteOrPanic[CreateFileHandlerFunc](o, optionCreateFileHandler, handlerFunc)
+	}
+}
+
+func OptionWriteContentToHandler(handlerFunc WriteContentToHandlerFunc) options.Option {
+	return func(o options.Options) {
+		options.WriteOrPanic[WriteContentToHandlerFunc](o, optionWriteContentToHandler, handlerFunc)
+	}
+}
+
+func OptionStreamContentToHandler(handlerFunc StreamContentToHandlerFunc) options.Option {
+	return func(o options.Options) {
+		options.WriteOrPanic[StreamContentToHandlerFunc](o, optionStreamContentToHandler, handlerFunc)
+	}
+}
+
+func OptionCreateDirectory(handlerFunc CreateDirectoryHandlerFunc) options.Option {
+	return func(o options.Options) {
+		options.WriteOrPanic[CreateDirectoryHandlerFunc](o, optionCreateDirectoryHandler, handlerFunc)
 	}
 }
