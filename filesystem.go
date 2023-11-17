@@ -11,7 +11,7 @@ import (
 // Depending on use case all or some handlers for dedicated functions can be overridden with options.Option.
 // By default, Filesystem will use builtin functions for interacting with filesystem.
 func New(opts ...options.Option) (Filesystem, error) {
-	opt := options.New().Resolve(opts...)
+	opt := options.Resolve(opts...)
 
 	optReadContentOfHandler, err := options.ReadOrDefault[ReadContentOfHandlerFunc](opt, optionReadContentOfHandler, readContentOfDefaultHandler)
 	if err != nil {
